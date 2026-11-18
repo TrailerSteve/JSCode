@@ -2048,7 +2048,7 @@ if (rearFlare) {
 }
     bodyCount = pos.length / 3;
 
-    topFlareStart = pos.lenght / 3;
+    topFlareStart = pos.length / 3;
     // TOP
     pushQuad(
         [flareX0, flareYInnerTop, flareZInner],

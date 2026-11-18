@@ -566,6 +566,15 @@ window.addEventListener("keydown", (e) => {
   }
 
   const k = e.key.toLowerCase();
+
+  // R = restart: same as the Restart button - back to panel 1, all defaults
+  if (k === "r" && !e.ctrlKey && !e.metaKey && !e.altKey) {
+    setPanelByIndex(0);
+    resetAllToDefaults();
+    e.preventDefault();
+    return;
+  }
+
   if (k in freeKeys) {
     freeKeys[k] = true;
     e.preventDefault();
@@ -663,6 +672,7 @@ function resetAllToDefaults() {
   document.getElementById("next")?.addEventListener("click", (e) => { e.preventDefault(); setPanelByIndex(currentIndex + 1); });
   document.getElementById("back")?.addEventListener("click", (e) => { e.preventDefault(); setPanelByIndex(currentIndex - 1); });
   document.getElementById("restart")?.addEventListener("click", (e) => {e.preventDefault();setPanelByIndex(0);resetAllToDefaults();});
+  document.getElementById("btnReset")?.addEventListener("click", (e) => {e.preventDefault();setPanelByIndex(0);resetAllToDefaults();});
 
   // Size controls (dropdowns)
   const lengthSelect = document.getElementById("length-options"); 

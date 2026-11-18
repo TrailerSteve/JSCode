@@ -1344,7 +1344,7 @@ let innerFendStart = 0, innerFendCount = 0;
 let bottomStart = 0, bottomCount = 0;
 let groundStart = 0, groundCount = 0;
 let rearFlareStart = 0, rearFlareCount = 0;
-let topFlareStart, topFlareCount = 0;
+let topFlareStart = 0, topFlareCount = 0;
 
 let interiorView = false;
 let axleMode = 'single';
@@ -1371,6 +1371,8 @@ let rearFlare = true;
     bottomStart = 0; bottomCount = 0;
     floorCrossStart = 0; floorCrossCount = 0;
     roofMemberStart = 0; roofMemberCount = 0; 
+    rearFlareStart = 0; rearFlareCount = 0;
+    topFlareStart = 0; topFlareCount = 0;
 
     // V nose sizing and main extents
     const safeMax = Math.max(2, dims.lengthFt - 2);
@@ -2048,16 +2050,19 @@ if (rearFlare) {
 }
     bodyCount = pos.length / 3;
 
-    topFlareStart = pos.length / 3;
-    // TOP
-    pushQuad(
-        [flareX0, flareYInnerTop, flareZInner],
-        [flareX1, flareYInnerTop, flareZInner],
-        [flareX1, flareYOuterTop, flareZOuter],
-        [flareX0, flareYOuterTop, flareZOuter],
-        flareTopNormal
-    );
-    topFlareCount = (pos.length/3) - rearFlareStart;
+    // TOP - roof extension to the end of the flare.
+    // Kept out of the body range so it is only drawn once, in ROOF colour.
+    if (rearFlare) {
+        topFlareStart = pos.length / 3;
+        pushQuad(
+            [flareX0, flareYInnerTop, flareZInner],
+            [flareX1, flareYInnerTop, flareZInner],
+            [flareX1, flareYOuterTop, flareZOuter],
+            [flareX0, flareYOuterTop, flareZOuter],
+            flareTopNormal
+        );
+        topFlareCount = (pos.length / 3) - topFlareStart;
+    }
 
     bottomStart = pos.length / 3;
     if (!isWide102) {
@@ -3430,6 +3435,12 @@ if (!structurePreview){
   if (roofCount > 0){
     gl.uniform3f(uColor, ...ROOF);
     gl.drawArrays(gl.TRIANGLES, roofStart, roofCount);
+  }
+
+  // Rear flare top: extends the roof to the end of the flare when on
+  if (topFlareCount > 0){
+    gl.uniform3f(uColor, ...ROOF);
+    gl.drawArrays(gl.TRIANGLES, topFlareStart, topFlareCount);
   }
 
 if (L !== 8){

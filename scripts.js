@@ -1,5 +1,6 @@
 // scripts.js — minimal WebGL + orbit camera + V-nose mesh (dropdown-driven)
 (() => {
+  "use strict";
   // DOM
   const canvas = document.getElementById("gl");
   if (!canvas) { console.error("Canvas #gl not found"); return; }
@@ -25,19 +26,6 @@
       0,0,1,0,
       0,0,0,1
     ]),
-    mul: (a,b) => {
-      const o = new Float32Array(16);
-      for (let c=0;c<4;c++){
-        for (let r=0;r<4;r++){
-          o[c*4+r] =
-            a[0*4+r]*b[c*4+0] +
-            a[1*4+r]*b[c*4+1] +
-            a[2*4+r]*b[c*4+2] +
-            a[3*4+r]*b[c*4+3];
-        }
-      }
-      return o;
-    },
     perspective: (fovy, aspect, near, far) => {
       const f = 1 / Math.tan(fovy/2);
       const nf = 1 / (near - far);
@@ -254,8 +242,8 @@ if (uUseTex == 1) {
   if (uTexMode == 2)      baseColor = texture2D(uFloorTex,   uv).rgb;
   else if (uTexMode == 3) baseColor = texture2D(uWallTex,    uv).rgb;
   else if (uTexMode == 4) baseColor = texture2D(uGroundTex,  uv).rgb;
-  else if (uBlackout == 1) baseColor = texture(uBlackoutTex, uv).rgb;
-  else baseColor = texture(uDiamondTex, uv).rgb;
+  else if (uBlackout == 1) baseColor = texture2D(uBlackoutTex, uv).rgb;
+  else baseColor = texture2D(uDiamondTex, uv).rgb;
 }
 
   if (uDiamond == 1 && uUseTex == 0) {
@@ -334,10 +322,6 @@ if (uUseTex == 1) {
   gl.clearColor(0, 0, 0, 0);
   gl.uniform1f(uTwoSided, 0.0);
 
-  function set1f(loc, v) {
-    if (loc) gl.uniform1f(loc, v);
-  }
-
 function loadTexture(url, unit, onReady) {
   const tex = gl.createTexture();
   gl.activeTexture(gl.TEXTURE0 + unit);
@@ -364,6 +348,9 @@ function loadTexture(url, unit, onReady) {
     gl.generateMipmap(gl.TEXTURE_2D);
 
     if (onReady) onReady();
+  };
+  img.onerror = () => {
+    console.error("Texture failed to load: " + url);
   };
   img.src = url;
 
@@ -447,11 +434,21 @@ if (btnRearFlare) {
     });
 }
 
+// Debug button (hidden): toggles roof lines the same way the checkbox does,
+// but wired here in JS so it doesn't rely on a global variable.
+const btnRoofLinesDbg = document.getElementById("btnRoofLinesDbg");
+if (btnRoofLinesDbg) {
+  btnRoofLinesDbg.addEventListener("click", () => {
+    showRoofLines = !showRoofLines;
+    rebuildMesh();
+  });
+}
+
   // Camera (orbit controls) 
   let camYaw = 0.8;
   let camPitch = 0.35;
-  let camDist = 1;
-  const CAM_MIN = camDist; 
+  let camDist = 5;
+  const CAM_MIN = 2;
   const CAM_MAX = 15;
   const target = [0, 0, 0];
   // debug free cam
@@ -630,10 +627,26 @@ function resetAllToDefaults() {
 
   if (addHeightSel) addHeightSel.value = String(DEFAULTS.addHeight);
 
+  // Feature checkboxes back to off (and their flags to match the boxes)
+  if (btnRoofLines) { btnRoofLines.checked = false; showRoofLines = true; }
+  if (btnBlackout)  { btnBlackout.checked = false;  blackout = false; }
+  if (btnRearFlare) { btnRearFlare.checked = false; rearFlare = false; }
+
+  // Extended tongue (unwired option, but its select still resets)
+  if (extTongueSel) extTongueSel.value = "none";
+
+  // Interior view back to exterior
+  interiorView = false;
+  if (btnInterior) btnInterior.textContent = "Interior View";
+
   setAxleMode(DEFAULTS.axleMode);
   updateAxleSizeOptions();
   noseLenFt = DEFAULTS.noseLenFt;
   enclosedColor = [0.7, 0.7, 0.7];
+
+  // Color highlight back to the silver card
+  document.querySelectorAll(".color-option").forEach(b => b.classList.remove("is-selected"));
+  document.querySelector(".color-option[data-color='silver']")?.classList.add("is-selected");
 
   if (typeof applyAxleRulesForLength === "function") applyAxleRulesForLength();
 
@@ -681,6 +694,7 @@ function resetAllToDefaults() {
   const ocFloorSel = document.getElementById("oc_floor");
   const ocWallSel  = document.getElementById("oc_wall");
   const ocRoofSel  = document.getElementById("oc_roof");
+  const extTongueSel = document.getElementById("ext_tongue");
   const ALL_WIDTH_OPTIONS = Array.from(widthSelect.options).map(opt => ({value: String(opt.value), text: opt.textContent}));
 
   const BASE_HEIGHT_IN = 72; 
@@ -946,13 +960,6 @@ function addCylinder(cx, cy, cz, r, h, axis = "y", seg = 24) {
   }
 }
 
-function addWheelX(x, y, z, tireR, tireW, rimR, rimW) {
-  // Tire (big)
-  addCylinder(x, y, z, tireR, tireW, "x", 32);
-  // Rim (smaller, centered)
-  addCylinder(x, y, z, rimR, rimW, "x", 32);
-}
-
 function tireProfile(width, treadR, sideR, beadR) {
   const w2 = width / 2;
   const rings = 9;
@@ -999,36 +1006,6 @@ function addTireX(cx, cy, cz, rings, seg = 48) {
       pushTri(pos, nor, p00, p10, p11, n);
       pushTri(pos, nor, p00, p11, p01, n);
     }
-  }
-}
-
-function addHalfCylinderX(cx, cy, cz, r, lenX, seg = 24) {
-  const x0 = cx - lenX / 2;
-  const x1 = cx + lenX / 2;
-
-  // top half only: angle 0..PI (y >= cy)
-  for (let i = 0; i < seg; i++) {
-    const a0 = (i / seg) * Math.PI;
-    const a1 = ((i + 1) / seg) * Math.PI;
-
-    const y00 = cy + Math.cos(a0) * r;
-    const z00 = cz + Math.sin(a0) * r;
-    const y01 = cy + Math.cos(a1) * r;
-    const z01 = cz + Math.sin(a1) * r;
-
-    const p00 = [x0, y00, z00];
-    const p01 = [x1, y00, z00];
-    const p10 = [x0, y01, z01];
-    const p11 = [x1, y01, z01];
-
-    // outward-ish normal (approx)
-    const n0 = [0, Math.cos(a0), Math.sin(a0)];
-    const n1 = [0, Math.cos(a1), Math.sin(a1)];
-    const n  = [0, (n0[1] + n1[1]) * 0.5, (n0[2] + n1[2]) * 0.5];
-
-    // two triangles
-    pushTri(pos, nor, p00, p01, p11, n);
-    pushTri(pos, nor, p00, p11, p10, n);
   }
 }
 
@@ -1216,14 +1193,6 @@ function addTandemFenderSidePlateX(sideX, zRear, zFront, radius, yOffset, yBotto
 const AMB_OUT=0.25
 const AMB_IN=0.95
 
-function drawExterior(start,count,rgb){
-  if(count<=0)return
-  gl.uniform1f(uTwoSided,0.0)
-  gl.uniform1f(uAmbient,AMB_OUT)
-  gl.uniform3f(uColor,...rgb)
-  gl.drawArrays(gl.TRIANGLES,start,count)
-}
-
 function drawInterior(start,count,rgb){
   if(count<=0)return
   gl.uniform1f(uTwoSided,1.0)
@@ -1285,11 +1254,6 @@ function addTongueTube(A, B, width, height) {
         pushTri(pos,nor,a,c,b,nOverride)
     }
 
-    function pushQuadRev(p0,p1,p2,p3,n){
-        pushTri(pos,nor,p0,p2,p1,n)
-        pushTri(pos,nor,p0,p3,p2,n)
-    }
-
   const COLOR_MAP = {
     silver:[0.7, 0.7, 0.7],
     black:[0.1, 0.1, 0.1],
@@ -1307,8 +1271,6 @@ function ocValueToSpacing(value, fallback) {
   if (value?.startsWith("24")) return OC_24;
   return fallback;
 }
-
-const ROOF_COLOR = [0.85, 0.85, 0.85];
 
 let bodyCount = 0;
 let tongueStart = 0, tongueCount = 0;
@@ -1341,6 +1303,8 @@ let rearTipStart = 0, rearTipCount = 0;
 let outerFendRStart = 0, outerFendRCount = 0;
 let outerFendLStart = 0, outerFendLCount = 0;
 let innerFloorStart = 0, innerFloorCount = 0;
+let innerWallStart = 0, innerWallCount = 0;
+let innerRoofStart = 0, innerRoofCount = 0;
 let noseInnerFloorStart = 0, noseInnerFloorCount = 0;
 let roofStart = 0, roofCount = 0;
 let innerVNoseStart = 0, innerVNoseCount = 0;
@@ -1358,7 +1322,7 @@ let topFlareStart = 0, topFlareCount = 0;
 
 let interiorView = false;
 let axleMode = 'single';
-let rearFlare = true;
+let rearFlare = false;
 
   function rebuildMesh() {
     // Core dimensions
@@ -2322,7 +2286,6 @@ if (rearFlare) {
         tandemFendLCount = (pos.length / 3) - tandemFendLStart;
     }else{
       // GOOD
-      const xWellPlateRInner = xWellPlateR*2
       // right fender
       outerFendRStart = pos.length / 3;
       addOuterFenderSidePlateWithHolesX("right", axleZ + 0.099, axleZ + 0.41, tFenderR + .01, tFenderY + 0.05, yB - 0.01, -0.001, wheelY + 0.05, tireR * 1.05, 0.0, 260);
@@ -2898,9 +2861,6 @@ if (rearFlare) {
   }
   function setAxleMode(mode) {
     axleMode = (mode === 'tandem') ? 'tandem' : 'single';
-    if (typeof localStorage !== 'undefined') {
-      localStorage.setItem('axleMode', axleMode);
-    }
     // keep header button text in sync (until you remove it)
     if (typeof btnAxle !== 'undefined' && btnAxle) {
       btnAxle.textContent = (axleMode === 'single') ? 'Single Axle' : 'Tandem Axle';
@@ -2931,7 +2891,6 @@ console.assert(typeof axleMode === 'string', 'axleMode initialized before use');
   if (btnAxle) {
     btnAxle.onclick = () => {
       axleMode = (axleMode === "single") ? "tandem" : "single";
-      if (typeof localStorage !== "undefined") localStorage.setItem("axleMode", axleMode);
       btnAxle.textContent = (axleMode === "single") ? "Single Axle" : "Tandem Axle";
       console.log("Axle mode:", axleMode);
       rebuildMesh();
@@ -3122,18 +3081,6 @@ document.querySelectorAll(".color-option").forEach(btn => {
   });
 });
 
-document.querySelectorAll(".axle-option").forEach(btn => {
-  btn.addEventListener("click", () => {
-
-    // remove highlight from all colors
-    document.querySelectorAll(".axle-option")
-      .forEach(b => b.classList.remove("is-selected"));
-
-    // highlight the clicked one
-    btn.classList.add("is-selected");
-
-  });
-});
 
 // DEFAULT COLOR
 const defaultKey = "silver";
@@ -3163,54 +3110,6 @@ arrows.forEach(btn => {
 function updateColorReveal() {
   const colorStrip = document.querySelector('.color-strip');
   if (!colorScroll || !colorStrip) return;
-
-  let isAnimating = false;
-
-  function gapPx(){
-    const s = getComputedStyle(colorStrip);
-    // works for either grid or flex with gap/column-gap
-    return parseFloat(s.columnGap || s.gap || '12') || 12;
-  }
-  function cardWidth(){
-    const first = colorStrip.children[0];
-    if (!first) return 0;
-    // width of one card + the gap between cards
-    return first.getBoundingClientRect().width + gapPx();
-  }
-
-  // public API used by your arrows: slide(1) next, slide(-1) prev
-  window.colorScroll = function(dir){
-    if (isAnimating || !colorStrip.children.length) return;
-    isAnimating = true;
-
-    const w = cardWidth();
-    const dur = 350; // ms
-
-    if (dir === 1){
-      // Animate left by one card, then move first -> end and snap back
-      colorStrip.style.transition = `transform ${dur}ms ease`;
-      colorStrip.style.transform  = `translateX(-${w}px)`;
-      colorStrip.addEventListener('transitionend', function onEnd(){
-        colorStrip.removeEventListener('transitionend', onEnd);
-        colorStrip.appendChild(colorStrip.firstElementChild);     // rotate
-        colorStrip.style.transition = 'none';
-        colorStrip.style.transform  = 'translateX(0)';       // snap back
-        // force reflow to apply the no-transition state
-        colorStrip.getBoundingClientRect();
-        colorStrip.style.transition = '';                    // restore transitions
-        isAnimating = false;
-      }, { once: true });
-    } else {
-      // Move last -> front without animation, position colorStrip at -w, then animate to 0
-      colorStrip.style.transition = 'none';
-      colorStrip.insertBefore(colorStrip.lastElementChild, colorStrip.firstElementChild);
-      colorStrip.style.transform  = `translateX(-${w}px)`;
-      colorStrip.getBoundingClientRect();                   // reflow
-      colorStrip.style.transition = `transform ${dur}ms ease`;
-      colorStrip.style.transform  = 'translateX(0)';
-      colorStrip.addEventListener('transitionend', () => { isAnimating = false; }, { once: true });
-    }
-  };
 
   // Recalculate on resize (width is recomputed at click-time too)
   window.addEventListener('resize', () => {
@@ -3314,11 +3213,23 @@ function updateFreeCam(dt) {
 
 // Render loop
 let lastFrameTime = performance.now();
+let fpsFrames = 0, fpsTime = 0;
 
 function frame(now) {
   const dt = Math.min(0.05, (now - lastFrameTime) / 1000);
   const L = Number(lengthSelect.value);
   lastFrameTime = now;
+
+  // FPS counter: refresh the HUD about twice a second
+  fpsFrames++;
+  fpsTime += dt;
+  if (fpsTime >= 0.5) {
+    const fps = Math.round(fpsFrames / fpsTime);
+    fpsFrames = 0;
+    fpsTime = 0;
+    const hudEl = document.getElementById("hud");
+    if (hudEl) hudEl.textContent = "FPS: " + fps + " — " + (freeCam ? "Free Cam" : "Orbit Cam");
+  }
   updateFreeCam(dt);
   resize();
   updateView();

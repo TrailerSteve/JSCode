@@ -684,6 +684,18 @@ function resetAllToDefaults() {
     const name = PANEL_ORDER[currentIndex];
     showPanel(name);
 	  if (name === "review") fillReviewSummary();
+	  // Grow the panel to fit the Review content, shrink it back on other steps
+	  const panel = document.getElementById("config-panel");
+	  if (panel) {
+		  if (name === "review") {
+			  panel.style.height = "auto";
+			  panel.style.maxHeight = "none";
+		  } else {
+			  panel.style.height = "270px";
+			  panel.style.maxHeight = "270px";
+		  }
+	  }
+
     // No dead-end clicks: Next is off on the last step, Back is off on the first
     document.getElementById("next")?.toggleAttribute("disabled", currentIndex >= PANEL_ORDER.length - 1);
     document.getElementById("back")?.toggleAttribute("disabled", currentIndex <= 0);

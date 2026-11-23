@@ -788,6 +788,7 @@ function fillReviewSummary() {
   document.getElementById("back")?.addEventListener("click", (e) => { e.preventDefault(); setPanelByIndex(currentIndex - 1); });
   document.getElementById("restart")?.addEventListener("click", (e) => {e.preventDefault();setPanelByIndex(0);resetAllToDefaults();});
   document.getElementById("btnReset")?.addEventListener("click", (e) => {e.preventDefault();setPanelByIndex(0);resetAllToDefaults();});
+	document.getElementById("btnReview")?.addEventListener("click", (e) => {e.preventDefault();setPanelByIndex(8); });
 
   // Size controls (dropdowns)
   const lengthSelect = document.getElementById("length-options"); 
@@ -3004,6 +3005,7 @@ const axleWarningTandem = document.getElementById("axle-warning-tandem");
 const btnInterior=document.getElementById('btnInterior')
 const btnStructure=document.getElementById('btnStructure')
 const axleSizeSelect = document.getElementById("axle_size");
+const btnReview=document.getElementById('btnReview')
 const SINGLE_AXLE_SIZES = [
   { value: "3_5_k", label: "3.5K Axle" },
   { value: "5_k",   label: "5K Axle" }

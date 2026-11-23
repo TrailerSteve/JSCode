@@ -59,3 +59,5 @@ canvas:active { cursor: grabbing; }
   border-color: #ff6a00;
   box-shadow: none;
 }
+.review-row { display: flex; justify-content: space-between; align-items: center; gap: 12px; padding: 10px 0; border-bottom: 1px solid #d0d4e0; }
+.review-row:last-child { border-bottom: none; }

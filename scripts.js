@@ -700,7 +700,7 @@ function resetAllToDefaults() {
 	  // Grow the panel to fit the Review content, shrink it back on other steps
 	  const panel = document.getElementById("config-panel");
 	  if (panel) {
-		  if (name === "review") {
+		  if (name === "review" || name === "submit") {
 			  panel.style.height = "auto";
 			  panel.style.maxHeight = "none";
 		  } else {

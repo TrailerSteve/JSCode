@@ -729,33 +729,39 @@ const FEATURE_LABELS = {
 };
 
 // Build the build summary and put it in the Review panel.
+// One summary row: label + value on the left, Edit button on the right.
+// "goto" is the wizard step the Edit button jumps back to.
+function reviewRow(label, value, goto) {
+  return '<div class="review-row"><div><strong>' + label + '</strong><br>' + value + '</div><button class="btn review-edit" data-goto="' + goto + '">Edit</button></div>';
+}
+
 function fillReviewSummary() {
-  const lines = [];
-  lines.push("Enclosed V-Nose Utility Trailer");
-  lines.push("Size: " + document.getElementById("length-options").value + "' long x " + document.getElementById("width-options").value + '" wide');
-  lines.push("Axle: " + (axleMode === "tandem" ? "Tandem" : "Single") + " — " + selectedText("axle_size"));
   const colorBtn = document.querySelector(".color-option.is-selected");
   const color = colorBtn ? colorBtn.dataset.color : "silver";
-  lines.push("Color: " + color.charAt(0).toUpperCase() + color.slice(1));
-  lines.push("Floor: " + selectedText("oc_floor") + "  |  Wall: " + selectedText("oc_wall") + "  |  Roof: " + selectedText("oc_roof"));
-  lines.push("Additional Height: " + selectedText("add_height"));
-  lines.push("Extended Tongue: " + selectedText("ext_tongue"));
+  const colorName = color.charAt(0).toUpperCase() + color.slice(1);
 
   const picked = [];
   document.querySelectorAll(".feature_e input[type='checkbox']:checked, .feature_i input[type='checkbox']:checked").forEach(cb => {
     const label = FEATURE_LABELS[cb.name];
     if (label && !picked.includes(label)) picked.push(label);
   });
-  lines.push("Features: " + (picked.length ? picked.join(", ") : "None selected"));
 
-  document.getElementById("review-summary").textContent = lines.join("\n");
+  const rows = [];
+  rows.push(reviewRow("Size", document.getElementById("length-options").value + "' long x " + document.getElementById("width-options").value + '" wide', "length"));
+  rows.push(reviewRow("Axle", (axleMode === "tandem" ? "Tandem" : "Single") + " — " + selectedText("axle_size"), "size_axle"));
+  rows.push(reviewRow("Color", colorName, "color"));
+  rows.push(reviewRow("Structure", "Floor: " + selectedText("oc_floor") + "  |  Wall: " + selectedText("oc_wall") + "  |  Roof: " + selectedText("oc_roof"), "feature_oc"));
+  rows.push(reviewRow("Additional Height", selectedText("add_height"), "feature_ad"));
+  rows.push(reviewRow("Extended Tongue", selectedText("ext_tongue"), "feature_e"));
+  rows.push(reviewRow("Features", picked.length ? picked.join(", ") : "None selected", "feature_e"));
+
+  document.getElementById("review-summary").innerHTML = rows.join("");
 }
 
   document.getElementById("next")?.addEventListener("click", (e) => { e.preventDefault(); setPanelByIndex(currentIndex + 1); });
   document.getElementById("back")?.addEventListener("click", (e) => { e.preventDefault(); setPanelByIndex(currentIndex - 1); });
   document.getElementById("restart")?.addEventListener("click", (e) => {e.preventDefault();setPanelByIndex(0);resetAllToDefaults();});
   document.getElementById("btnReset")?.addEventListener("click", (e) => {e.preventDefault();setPanelByIndex(0);resetAllToDefaults();});
-	document.getElementById("btnSend")?.style.setProperty("display", name === "review" ? "" : "none");
 
   // Size controls (dropdowns)
   const lengthSelect = document.getElementById("length-options"); 

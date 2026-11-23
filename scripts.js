@@ -444,6 +444,19 @@ if (btnRoofLinesDbg) {
   });
 }
 
+	// Edit buttons on the Review step jump back to that section.
+	// One listener on the whole summary box catches every Edit button inside it,
+	// because the rows are rebuilt fresh each time the step opens.
+	document.getElementById("review-summary")?.addEventListener("click", (e) => {
+  		const btn = e.target.closest(".review-edit");
+  		if (!btn) return;
+  		const step = PANEL_ORDER.indexOf(btn.dataset.goto);
+  		if (step >= 0) setPanelByIndex(step);
+	});
+
+document.getElementById("btnRestartReview")?.addEventListener("click", (e) => { e.preventDefault(); setPanelByIndex(0); resetAllToDefaults(); });
+
+	
   // Camera (orbit controls) 
   let camYaw = 0.8;
   let camPitch = 0.35;

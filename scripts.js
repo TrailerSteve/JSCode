@@ -714,10 +714,10 @@ function resetAllToDefaults() {
 		  viewer.style.display = name === "review" ? "none" : "";
 	  }
 	  // Hide the footer buttons on Review (the review screen has its own Submit/Restart); show them on other steps
-	  const footer = document.getElementById("panel-footer");
-	  if (footer) {
-		  footer.style.display = name === "review" ? "none" : "";
-	  }
+	  //const footer = document.getElementById("panel-footer");
+	  //if (footer) {
+		  //footer.style.display = name === "review" ? "none" : "";
+	  //}
 
     // No dead-end clicks: Next is off on the last step, Back is off on the first
     document.getElementById("next")?.toggleAttribute("disabled", currentIndex >= PANEL_ORDER.length - 1);

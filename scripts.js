@@ -753,23 +753,36 @@ function fillReviewSummary() {
   const color = colorBtn ? colorBtn.dataset.color : "silver";
   const colorName = color.charAt(0).toUpperCase() + color.slice(1);
 
-  const picked = [];
-  document.querySelectorAll(".feature_e input[type='checkbox']:checked, .feature_i input[type='checkbox']:checked").forEach(cb => {
-    const label = FEATURE_LABELS[cb.name];
-    if (label && !picked.includes(label)) picked.push(label);
-  });
+  // Checked features from one panel: ".feature_e" is Exterior, ".feature_i" is Interior.
+  function pickedFrom(panelClass) {
+    const picked = [];
+    document.querySelectorAll(panelClass + " input[type='checkbox']:checked").forEach(cb => {
+      const label = FEATURE_LABELS[cb.name];
+      if (label && !picked.includes(label)) picked.push(label);
+    });
+    return picked;
+  }
+  const exterior = pickedFrom(".feature_e");
+  const interior = pickedFrom(".feature_i");
 
-  const rows = [];
-  rows.push(reviewRow("Size", document.getElementById("length-options").value + "' long x " + document.getElementById("width-options").value + '" wide', "length"));
-  rows.push(reviewRow("Axle", (axleMode === "tandem" ? "Tandem" : "Single") + " — " + selectedText("axle_size"), "size_axle"));
-  rows.push(reviewRow("Color", colorName, "color"));
-  rows.push(reviewRow("Structure", "Floor: " + selectedText("oc_floor") + "  |  Wall: " + selectedText("oc_wall") + "  |  Roof: " + selectedText("oc_roof"), "feature_oc"));
-  rows.push(reviewRow("Additional Height", selectedText("add_height"), "feature_ad"));
-  rows.push(reviewRow("Extended Tongue", selectedText("ext_tongue"), "feature_e"));
-  rows.push(reviewRow("Features", picked.length ? picked.join(", ") : "None selected", "feature_e"));
+  // Left column: everything else.
+  const left = [];
+  left.push(reviewRow("Size", document.getElementById("length-options").value + "' long x " + document.getElementById("width-options").value + '" wide', "length"));
+  left.push(reviewRow("Axle", (axleMode === "tandem" ? "Tandem" : "Single") + " — " + selectedText("axle_size"), "size_axle"));
+  left.push(reviewRow("Color", colorName, "color"));
+  left.push(reviewRow("Structure", "Floor: " + selectedText("oc_floor") + "  |  Wall: " + selectedText("oc_wall") + "  |  Roof: " + selectedText("oc_roof"), "feature_oc"));
+  left.push(reviewRow("Additional Height", selectedText("add_height"), "feature_ad"));
+  left.push(reviewRow("Extended Tongue", selectedText("ext_tongue"), "feature_e"));
 
-  document.getElementById("review-summary").innerHTML = rows.join("");
+  // Right column: the features, split in two.
+  const right = [];
+  right.push(reviewRow("Exterior Features", exterior.length ? exterior.join(", ") : "None selected", "feature_e"));
+  right.push(reviewRow("Interior Features", interior.length ? interior.join(", ") : "None selected", "feature_i"));
+
+  document.getElementById("review-summary").innerHTML =
+    '<div class="review-columns"><div class="review-col">' + left.join("") + '</div><div class="review-col">' + right.join("") + '</div></div>';
 }
+
 
   document.getElementById("next")?.addEventListener("click", (e) => { e.preventDefault(); setPanelByIndex(currentIndex + 1); });
   document.getElementById("back")?.addEventListener("click", (e) => { e.preventDefault(); setPanelByIndex(currentIndex - 1); });

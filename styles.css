@@ -59,5 +59,7 @@ canvas:active { cursor: grabbing; }
   border-color: #ff6a00;
   box-shadow: none;
 }
-.review-row { display: flex; justify-content: space-between; align-items: center; gap: 12px; padding: 10px 0; border-bottom: 1px solid #d0d4e0; }
-.review-row:last-child { border-bottom: none; }
+.review-columns { display: flex; gap: 24px; align-items: flex-start; }
+.review-col { flex: 1; min-width: 0; }
+@media (max-width: 700px) { .review-columns { flex-direction: column; } }
+

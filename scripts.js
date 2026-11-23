@@ -690,7 +690,7 @@ function resetAllToDefaults() {
       structurePreview = nextStructurePreview;
     }
   }
-  const PANEL_ORDER = ["length","width","size_axle","color","feature_oc","feature_ad","feature_e","feature_i", "review"];
+  const PANEL_ORDER = ["length","width","size_axle","color","feature_oc","feature_ad","feature_e","feature_i", "review", "submit"];
   let currentIndex = 0;
   function setPanelByIndex(i) {
     currentIndex = Math.max(0, Math.min(PANEL_ORDER.length - 1, i));

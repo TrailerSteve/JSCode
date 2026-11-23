@@ -693,6 +693,7 @@ function resetAllToDefaults() {
   document.getElementById("back")?.addEventListener("click", (e) => { e.preventDefault(); setPanelByIndex(currentIndex - 1); });
   document.getElementById("restart")?.addEventListener("click", (e) => {e.preventDefault();setPanelByIndex(0);resetAllToDefaults();});
   document.getElementById("btnReset")?.addEventListener("click", (e) => {e.preventDefault();setPanelByIndex(0);resetAllToDefaults();});
+	document.getElementById("btnSend")?.style.setProperty("display", name === "review" ? "" : "none");
 
   // Size controls (dropdowns)
   const lengthSelect = document.getElementById("length-options"); 

@@ -1269,7 +1269,7 @@ function addTongueTube(A, B, width, height) {
     green:[0.0, 1.0, 0.0],
     blue:[0.0, 0.0, 1.0],
     red:[1.0, 0.0, 0.0],
-    yellow:[1.5, 1.5, 0.0],
+    orange:[1.5, .45, 0.0],
   };
 
 function ocValueToSpacing(value, fallback) {

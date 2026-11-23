@@ -713,6 +713,12 @@ function resetAllToDefaults() {
 	  if (viewer) {
 		  viewer.style.display = name === "review" ? "none" : "";
 	  }
+	  // Hide the footer buttons on Review (the review screen has its own Submit/Restart); show them on other steps
+	  const footer = document.getElementById("panel-footer");
+	  if (footer) {
+		  footer.style.display = name === "review" ? "none" : "";
+	  }
+
     // No dead-end clicks: Next is off on the last step, Back is off on the first
     document.getElementById("next")?.toggleAttribute("disabled", currentIndex >= PANEL_ORDER.length - 1);
     document.getElementById("back")?.toggleAttribute("disabled", currentIndex <= 0);
@@ -788,7 +794,8 @@ function fillReviewSummary() {
   document.getElementById("back")?.addEventListener("click", (e) => { e.preventDefault(); setPanelByIndex(currentIndex - 1); });
   document.getElementById("restart")?.addEventListener("click", (e) => {e.preventDefault();setPanelByIndex(0);resetAllToDefaults();});
   document.getElementById("btnReset")?.addEventListener("click", (e) => {e.preventDefault();setPanelByIndex(0);resetAllToDefaults();});
-	document.getElementById("btnReview")?.addEventListener("click", (e) => {e.preventDefault();setPanelByIndex(8); });
+	document.getElementById("btnReview")?.addEventListener("click", (e) => {e.preventDefault(); setPanelByIndex(PANEL_ORDER.indexOf("review")); });
+
 
   // Size controls (dropdowns)
   const lengthSelect = document.getElementById("length-options"); 

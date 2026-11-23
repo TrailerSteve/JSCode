@@ -711,7 +711,7 @@ function resetAllToDefaults() {
 	  // Hide the 3D view on Review so the summary has the whole screen; bring it back on other steps
 	  const viewer = document.getElementById("viewer-panel");
 	  if (viewer) {
-		  viewer.style.display = name === "review" ? "none" : "";
+		  viewer.style.display = (name === "review" || name === "submit") ? "none" : "";
 	  }
 	  // Hide the footer buttons on Review (the review screen has its own Submit/Restart); show them on other steps
 	  //const footer = document.getElementById("panel-footer");

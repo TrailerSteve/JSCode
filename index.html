@@ -170,14 +170,25 @@
 					</select>
       				</div>
     			</div>
-			<div class="config-panel-body" data-tab-body="feature_i" style="display:none; color: black;">
+				<div class="config-panel-body" data-tab-body="feature_i" style="display:none; color: black;">
       				<h1>Interior Features</h1>
       				<div class="feature_i">
       					<label><input type="checkbox" name="feature_spare_outside"> Spare Tire Mount(Outside)</label>
       					<label><input type="checkbox" name="feature_spare_inside"> Spare Tire Mount(Inside)</label>
       					<label><input type="checkbox" name="feature_1">Place holder 1</label>
       				</div>
-   			</div>
+				</div>
+				<div class="config-panel-body" data-tab-body="review" style="display:none; color: black;">
+					<h1>Review Your Build</h1>
+					<div id="review-summary" style="font-size: 1.4rem; white-space: pre-line;"></div>
+					<div style="margin-top: 1rem; display: flex; flex-direction: column; gap: 8px; max-width: 500px;">
+						<label style="font-size: 1.4rem;">Your name <input type="text" id="cust-name" style="font-size: 1.4rem;"></label>
+						<label style="font-size: 1.4rem;">Phone <input type="tel" id="cust-phone" style="font-size: 1.4rem;"></label>
+						<label style="font-size: 1.4rem;">Email <input type="email" id="cust-email" style="font-size: 1.4rem;"></label>
+					</div>
+					<button id="btnSend" class="btn" style="margin-top: 1rem; font-size: 1.6rem;">Send My Build</button>
+					<div id="send-note" style="margin-top: 0.5rem; font-size: 1.2rem;"></div>
+				</div>
     			<div class="panel-footer">
       				<button id="back" class="btn">Back</button>
       				<button id="restart" class="btn">Restart</button>

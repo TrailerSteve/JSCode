@@ -695,7 +695,11 @@ function resetAllToDefaults() {
 			  panel.style.maxHeight = "270px";
 		  }
 	  }
-
+	  // Hide the 3D view on Review so the summary has the whole screen; bring it back on other steps
+	  const viewer = document.getElementById("viewer-panel");
+	  if (viewer) {
+		  viewer.style.display = name === "review" ? "none" : "";
+	  }
     // No dead-end clicks: Next is off on the last step, Back is off on the first
     document.getElementById("next")?.toggleAttribute("disabled", currentIndex >= PANEL_ORDER.length - 1);
     document.getElementById("back")?.toggleAttribute("disabled", currentIndex <= 0);

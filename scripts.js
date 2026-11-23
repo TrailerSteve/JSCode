@@ -632,6 +632,10 @@ function resetAllToDefaults() {
   if (btnBlackout)  { btnBlackout.checked = false;  blackout = false; }
   if (btnRearFlare) { btnRearFlare.checked = false; rearFlare = false; }
 
+  // Clear ticks on the remaining (currently unwired) feature checkboxes too,
+  // so Reset leaves no stale ticks behind
+  document.querySelectorAll(".feature_e input[type='checkbox'], .feature_i input[type='checkbox']").forEach(cb => { cb.checked = false; });
+
   // Extended tongue (unwired option, but its select still resets)
   if (extTongueSel) extTongueSel.value = "none";
 
@@ -679,6 +683,9 @@ function resetAllToDefaults() {
     currentIndex = Math.max(0, Math.min(PANEL_ORDER.length - 1, i));
     const name = PANEL_ORDER[currentIndex];
     showPanel(name);
+    // No dead-end clicks: Next is off on the last step, Back is off on the first
+    document.getElementById("next")?.toggleAttribute("disabled", currentIndex >= PANEL_ORDER.length - 1);
+    document.getElementById("back")?.toggleAttribute("disabled", currentIndex <= 0);
     if (name === "color" && typeof revealColorOptions === "function") revealColorOptions();
   }
   setPanelByIndex(0);
@@ -1262,7 +1269,7 @@ function addTongueTube(A, B, width, height) {
     green:[0.0, 1.0, 0.0],
     blue:[0.0, 0.0, 1.0],
     red:[1.0, 0.0, 0.0],
-    orange:[1.5, .45, 0.0],
+    yellow:[1.5, 1.5, 0.0],
   };
 
 function ocValueToSpacing(value, fallback) {

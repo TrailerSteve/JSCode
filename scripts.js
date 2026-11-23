@@ -683,12 +683,58 @@ function resetAllToDefaults() {
     currentIndex = Math.max(0, Math.min(PANEL_ORDER.length - 1, i));
     const name = PANEL_ORDER[currentIndex];
     showPanel(name);
+	  if (name === "review") fillReviewSummary();
     // No dead-end clicks: Next is off on the last step, Back is off on the first
     document.getElementById("next")?.toggleAttribute("disabled", currentIndex >= PANEL_ORDER.length - 1);
     document.getElementById("back")?.toggleAttribute("disabled", currentIndex <= 0);
     if (name === "color" && typeof revealColorOptions === "function") revealColorOptions();
   }
   setPanelByIndex(0);
+	// Reads the selected option's visible text, not its value.
+// (value is "7_k", text is "7K (2-3.5K) Axles" — the text is what Chad wants to read.)
+function selectedText(id) {
+  const sel = document.getElementById(id);
+  return sel ? sel.options[sel.selectedIndex].text : "";
+}
+
+// Checkbox names -> the words to show in the summary.
+// "Place holder 1" is left out on purpose, so it never shows up here.
+const FEATURE_LABELS = {
+  feature_one_piece: "One Piece Aluminum Roof",
+  feature_spare_outside: "Spare Tire Mount (Outside)",
+  feature_blackout: "Blackout Package",
+  feature_marker: "Additional Marker Lights",
+  feature_tail: "Additional Tail Lights (Requires 55\" Barlock)",
+  feature_flare: "Rear Flare",
+  feature_side: "24\" Wide Side Door",
+  feature_escape: "Escape Door",
+  feature_ladder: "Ladder Rack",
+  feature_spare_inside: "Spare Tire Mount (Inside)"
+};
+
+// Build the build summary and put it in the Review panel.
+function fillReviewSummary() {
+  const lines = [];
+  lines.push("Enclosed V-Nose Utility Trailer");
+  lines.push("Size: " + document.getElementById("length-options").value + "' long x " + document.getElementById("width-options").value + '" wide');
+  lines.push("Axle: " + (axleMode === "tandem" ? "Tandem" : "Single") + " — " + selectedText("axle_size"));
+  const colorBtn = document.querySelector(".color-option.is-selected");
+  const color = colorBtn ? colorBtn.dataset.color : "silver";
+  lines.push("Color: " + color.charAt(0).toUpperCase() + color.slice(1));
+  lines.push("Floor: " + selectedText("oc_floor") + "  |  Wall: " + selectedText("oc_wall") + "  |  Roof: " + selectedText("oc_roof"));
+  lines.push("Additional Height: " + selectedText("add_height"));
+  lines.push("Extended Tongue: " + selectedText("ext_tongue"));
+
+  const picked = [];
+  document.querySelectorAll(".feature_e input[type='checkbox']:checked, .feature_i input[type='checkbox']:checked").forEach(cb => {
+    const label = FEATURE_LABELS[cb.name];
+    if (label && !picked.includes(label)) picked.push(label);
+  });
+  lines.push("Features: " + (picked.length ? picked.join(", ") : "None selected"));
+
+  document.getElementById("review-summary").textContent = lines.join("\n");
+}
+
   document.getElementById("next")?.addEventListener("click", (e) => { e.preventDefault(); setPanelByIndex(currentIndex + 1); });
   document.getElementById("back")?.addEventListener("click", (e) => { e.preventDefault(); setPanelByIndex(currentIndex - 1); });
   document.getElementById("restart")?.addEventListener("click", (e) => {e.preventDefault();setPanelByIndex(0);resetAllToDefaults();});

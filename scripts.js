@@ -789,7 +789,77 @@ function fillReviewSummary() {
     '<div class="review-columns"><div class="review-col">' + left.join("") + '</div><div class="review-col">' + right.join("") + '</div></div>';
 }
 
+// Plain-text version of the build, for the email to Chad.
+// Same choices fillReviewSummary() reads, one per line.
+function buildSummaryText() {
+  const colorBtn = document.querySelector(".color-option.is-selected");
+  const color = colorBtn ? colorBtn.dataset.color : "silver";
+  const colorName = color.charAt(0).toUpperCase() + color.slice(1);
 
+  function pickedFrom(panelClass) {
+    const picked = [];
+    document.querySelectorAll(panelClass + " input[type='checkbox']:checked").forEach(cb => {
+      const label = FEATURE_LABELS[cb.name];
+      if (label && !picked.includes(label)) picked.push(label);
+    });
+    return picked;
+  }
+  const exterior = pickedFrom(".feature_e");
+  const interior = pickedFrom(".feature_i");
+
+  return [
+    "Size: " + document.getElementById("length-options").value + "' long x " + document.getElementById("width-options").value + '" wide',
+    "Axle: " + (axleMode === "tandem" ? "Tandem" : "Single") + " — " + selectedText("axle_size"),
+    "Color: " + colorName,
+    "Structure: Floor: " + selectedText("oc_floor") + " | Wall: " + selectedText("oc_wall") + " | Roof: " + selectedText("oc_roof"),
+    "Additional Height: " + selectedText("add_height"),
+    "Extended Tongue: " + selectedText("ext_tongue"),
+    "Exterior Features: " + (exterior.length ? exterior.join(", ") : "None selected"),
+    "Interior Features: " + (interior.length ? interior.join(", ") : "None selected")
+  ].join("\n");
+}
+
+// Send the build to Chad through the Google Apps Script web app.
+const BUILD_SENDER_URL = "https://script.google.com/macros/s/AKfycbwLJX6srlSYOsnV3L99HXhOywqRlaUYVoj_YkmpmHjXz34IVyC7qVp6gHnXDBlvj8VY/exec";
+const BUILD_SENDER_TOKEN = "6dd7c7573e2033340ec99c4831158841";
+
+document.getElementById("btnSend")?.addEventListener("click", async (e) => {
+  e.preventDefault();
+  const btn = document.getElementById("btnSend");
+  const note = document.getElementById("send-note");
+  const name = document.getElementById("cust-name").value.trim();
+  const phone = document.getElementById("cust-phone").value.trim();
+  const email = document.getElementById("cust-email").value.trim();
+
+  if (!name) {
+    note.textContent = "Please enter your name so Chad knows who the build is from.";
+    return;
+  }
+  if (!phone && !email) {
+    note.textContent = "Please enter a phone number or email so Chad can get back to you.";
+    return;
+  }
+
+  btn.disabled = true;
+  note.textContent = "Sending your build...";
+  try {
+    const res = await fetch(BUILD_SENDER_URL, {
+      method: "POST",
+      headers: { "Content-Type": "text/plain" },
+      body: JSON.stringify({ token: BUILD_SENDER_TOKEN, name: name, phone: phone, email: email, build: buildSummaryText() })
+    });
+    const result = await res.json();
+    if (result.ok) {
+      note.textContent = "Sent! Chad will get back to you with a price.";
+    } else {
+      note.textContent = "Couldn't send that — please try again, or call the store.";
+      btn.disabled = false;
+    }
+  } catch (err) {
+    note.textContent = "Couldn't send that — please try again, or call the store.";
+    btn.disabled = false;
+  }
+});
   document.getElementById("next")?.addEventListener("click", (e) => { e.preventDefault(); setPanelByIndex(currentIndex + 1); });
   document.getElementById("back")?.addEventListener("click", (e) => { e.preventDefault(); setPanelByIndex(currentIndex - 1); });
   document.getElementById("restart")?.addEventListener("click", (e) => {e.preventDefault();setPanelByIndex(0);resetAllToDefaults();});

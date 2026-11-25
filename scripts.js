@@ -877,7 +877,7 @@ if (email && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
     const res = await fetch(BUILD_SENDER_URL, {
       method: "POST",
       headers: { "Content-Type": "text/plain" },
-      body: JSON.stringify({ token: BUILD_SENDER_TOKEN, name: name, phone: phone, email: email, build: buildSummaryText() })
+      body: JSON.stringify({ token: BUILD_SENDER_TOKEN, name: name, phone: phoneNice, email: email, build: buildSummaryText() })
     });
     const result = await res.json();
 	if (result.ok) {

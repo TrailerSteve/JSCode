@@ -838,22 +838,29 @@ if (!name) {
   note.textContent = "Please enter your name.";
   return;
 }
-
-// Phone: keep only the digits. A US number is 10 digits
-// (an 11th leading 1 is fine — that's just the country code).
-const phoneDigits = phone.replace(/\D/g, "");
-const digits10 = phoneDigits.length === 11 && phoneDigits[0] === "1"
-  ? phoneDigits.slice(1)
-  : phoneDigits;
-if (digits10.length !== 10) {
-  note.textContent = "Please enter a 10-digit phone number.";
+if (!phone && !email) {
+  note.textContent = "Please enter a phone number or email.";
   return;
 }
-// Tidy it up for the email: (573) 431-4444
-const phoneNice = "(" + digits10.slice(0, 3) + ") " + digits10.slice(3, 6) + "-" + digits10.slice(6);
 
-// Email: must look like name@example.com
-if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
+// Phone: only checked if they gave one. Keep only the digits —
+// a US number is 10 digits (an 11th leading 1 is fine).
+let phoneNice = "";
+if (phone) {
+  const phoneDigits = phone.replace(/\D/g, "");
+  const digits10 = phoneDigits.length === 11 && phoneDigits[0] === "1"
+    ? phoneDigits.slice(1)
+    : phoneDigits;
+  if (digits10.length !== 10) {
+    note.textContent = "Please enter a 10-digit phone number.";
+    return;
+  }
+  // Tidy it up for the email: (573) 431-4444
+  phoneNice = "(" + digits10.slice(0, 3) + ") " + digits10.slice(3, 6) + "-" + digits10.slice(6);
+}
+
+// Email: only checked if they gave one. Must look like name@example.com
+if (email && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
   note.textContent = "Please enter a valid email address.";
   return;
 }

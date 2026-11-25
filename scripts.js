@@ -693,7 +693,7 @@ function resetAllToDefaults() {
       structurePreview = nextStructurePreview;
     }
   }
-  const PANEL_ORDER = ["length","width","size_axle","color","feature_oc","feature_ad","feature_e","feature_i", "review", "submit"];
+  const PANEL_ORDER = ["length","width","size_axle","color","feature_oc","feature_ad","feature_e","feature_i", "review", "submit", "sent"];
   let currentIndex = 0;
   function setPanelByIndex(i) {
     currentIndex = Math.max(0, Math.min(PANEL_ORDER.length - 1, i));
@@ -703,7 +703,7 @@ function resetAllToDefaults() {
 	  // Grow the panel to fit the Review content, shrink it back on other steps
 	  const panel = document.getElementById("config-panel");
 	  if (panel) {
-		  if (name === "review" || name === "submit") {
+		  if (name === "review" || name === "submit" || name === "sent") {
 			  panel.style.height = "auto";
 			  panel.style.maxHeight = "none";
 		  } else {
@@ -714,13 +714,13 @@ function resetAllToDefaults() {
 	  // Hide the 3D view on Review so the summary has the whole screen; bring it back on other steps
 	  const viewer = document.getElementById("viewer-panel");
 	  if (viewer) {
-		  viewer.style.display = (name === "review" || name === "submit") ? "none" : "";
+		  viewer.style.display = (name === "review" || name === "submit" || name === "sent") ? "none" : "";
 	  }
 	  // Hide the footer buttons on Review (the review screen has its own Submit/Restart); show them on other steps
-	  //const footer = document.getElementById("panel-footer");
-	  //if (footer) {
-		  //footer.style.display = name === "review" ? "none" : "";
-	  //}
+	  const footer = document.getElementById("panel-footer");
+	  if (footer) {
+		  footer.style.display = name === "submit" || name === "sent" ? "none" : "";
+	  }
 
     // No dead-end clicks: Next is off on the last step, Back is off on the first
     document.getElementById("next")?.toggleAttribute("disabled", currentIndex >= PANEL_ORDER.length - 1);
@@ -876,7 +876,6 @@ if (email && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
     const result = await res.json();
     if (result.ok) {
       note.textContent = "Sent! Someone will get back with you as soon as we can.";
-		btn.disabled = false;
     } else {
       note.textContent = "Couldn't send that — please try again, or call the store.";
       btn.disabled = false;

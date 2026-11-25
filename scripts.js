@@ -834,14 +834,29 @@ document.getElementById("btnSend")?.addEventListener("click", async (e) => {
   const phone = document.getElementById("cust-phone").value.trim();
   const email = document.getElementById("cust-email").value.trim();
 
-  if (!name) {
-    note.textContent = "Please enter your name.";
-    return;
-  }
-  if (!phone && !email) {
-    note.textContent = "Please enter a phone number or email.";
-    return;
-  }
+if (!name) {
+  note.textContent = "Please enter your name.";
+  return;
+}
+
+// Phone: keep only the digits. A US number is 10 digits
+// (an 11th leading 1 is fine — that's just the country code).
+const phoneDigits = phone.replace(/\D/g, "");
+const digits10 = phoneDigits.length === 11 && phoneDigits[0] === "1"
+  ? phoneDigits.slice(1)
+  : phoneDigits;
+if (digits10.length !== 10) {
+  note.textContent = "Please enter a 10-digit phone number.";
+  return;
+}
+// Tidy it up for the email: (573) 431-4444
+const phoneNice = "(" + digits10.slice(0, 3) + ") " + digits10.slice(3, 6) + "-" + digits10.slice(6);
+
+// Email: must look like name@example.com
+if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
+  note.textContent = "Please enter a valid email address.";
+  return;
+}
 
   btn.disabled = true;
   note.textContent = "Sending your build...";

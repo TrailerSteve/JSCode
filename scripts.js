@@ -3437,6 +3437,10 @@ function frame(now) {
   const dt = Math.min(0.05, (now - lastFrameTime) / 1000);
   const L = Number(lengthSelect.value);
   lastFrameTime = now;
+	// The side door shows on longer trailers by default, but on an 8' trailer
+	// it only shows when the customer ticks the 24" Wide Side Door option.
+	const sideDoorChosen = document.querySelector("input[name='feature_side']")?.checked || false;
+	const showSideDoor = (L !== 8) || sideDoorChosen;
 
   // FPS counter: refresh the HUD about twice a second
   fpsFrames++;
@@ -3582,7 +3586,7 @@ if (!structurePreview){
     gl.drawArrays(gl.TRIANGLES, topFlareStart, topFlareCount);
   }
 
-if (L !== 8){
+if (showSideDoor){
   // side door
   gl.uniform3f(uColor, ...TRIM_DOOR);
   gl.drawArrays(gl.TRIANGLES, sideDoorTrimStart, sideDoorTrimCount);
@@ -3665,7 +3669,7 @@ if (interiorView && !structurePreview) {
   if (uUseTex)  gl.uniform1i(uUseTex, 0);
   if (uTexMode) gl.uniform1i(uTexMode, 0);
 
-  drawInterior(innerDoorStart, innerDoorCount, TRIM);
+  if (showSideDoor) drawInterior(innerDoorStart, innerDoorCount, TRIM);
 
   drawInterior(roofMemberStart, roofMemberCount, ROOF);
 }

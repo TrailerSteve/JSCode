@@ -835,11 +835,11 @@ document.getElementById("btnSend")?.addEventListener("click", async (e) => {
   const email = document.getElementById("cust-email").value.trim();
 
   if (!name) {
-    note.textContent = "Please enter your name so Chad knows who the build is from.";
+    note.textContent = "Please enter your name.";
     return;
   }
   if (!phone && !email) {
-    note.textContent = "Please enter a phone number or email so Chad can get back to you.";
+    note.textContent = "Please enter a phone number or email.";
     return;
   }
 
@@ -853,7 +853,7 @@ document.getElementById("btnSend")?.addEventListener("click", async (e) => {
     });
     const result = await res.json();
     if (result.ok) {
-      note.textContent = "Sent! Chad will get back to you with a price.";
+      note.textContent = "Sent! Someone will get back with you as soon as we can.";
     } else {
       note.textContent = "Couldn't send that — please try again, or call the store.";
       btn.disabled = false;

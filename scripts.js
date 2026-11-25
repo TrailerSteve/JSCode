@@ -890,6 +890,7 @@ if (email && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
   document.getElementById("restart")?.addEventListener("click", (e) => {e.preventDefault();setPanelByIndex(0);resetAllToDefaults();});
   document.getElementById("btnReset")?.addEventListener("click", (e) => {e.preventDefault();setPanelByIndex(0);resetAllToDefaults();});
 	document.getElementById("btnReview")?.addEventListener("click", (e) => {e.preventDefault(); setPanelByIndex(PANEL_ORDER.indexOf("review")); });
+	document.getElementById("new")?.addEventListener("click", (e) => {e.preventDefault();setPanelByIndex(0);resetAllToDefaults();});
 
 
   // Size controls (dropdowns)

@@ -708,7 +708,8 @@ function resetAllToDefaults() {
     showPanel(name);
 	// Show the inside of the trailer while on the Interior Features step
 	interiorView = (name === "feature_i");
-	if (btnInterior) btnInterior.textContent = interiorView ? "Exterior View" : "Interior View";
+	const interiorBtn = document.getElementById("btnInterior");
+	if (interiorBtn) interiorBtn.textContent = interiorView ? "Exterior View" : "Interior View";
 	  if (name === "review") fillReviewSummary();
 	  // Grow the panel to fit the Review content, shrink it back on other steps
 	  const panel = document.getElementById("config-panel");

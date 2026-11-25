@@ -876,6 +876,7 @@ if (email && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
     const result = await res.json();
     if (result.ok) {
       note.textContent = "Sent! Someone will get back with you as soon as we can.";
+		btn.disabled = false;
     } else {
       note.textContent = "Couldn't send that — please try again, or call the store.";
       btn.disabled = false;

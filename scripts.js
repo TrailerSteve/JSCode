@@ -664,6 +664,12 @@ function resetAllToDefaults() {
   noseLenFt = DEFAULTS.noseLenFt;
   enclosedColor = [0.7, 0.7, 0.7];
 
+	// Reset the send state so a new build can be sent — but leave the customer's name and contact details in place.
+	const sendNote = document.getElementById("send-note");
+	if (sendNote) sendNote.textContent = "";
+	const btnSend = document.getElementById("btnSend");
+	if (btnSend) btnSend.disabled = false;
+
   // Color highlight back to the silver card
   document.querySelectorAll(".color-option").forEach(b => b.classList.remove("is-selected"));
   document.querySelector(".color-option[data-color='silver']")?.classList.add("is-selected");
@@ -874,9 +880,9 @@ if (email && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
       body: JSON.stringify({ token: BUILD_SENDER_TOKEN, name: name, phone: phone, email: email, build: buildSummaryText() })
     });
     const result = await res.json();
-    if (result.ok) {
-      note.textContent = "Sent! Someone will get back with you as soon as we can.";
-    } else {
+	if (result.ok) {
+  		setPanelByIndex(PANEL_ORDER.indexOf("sent"));
+	} else {
       note.textContent = "Couldn't send that — please try again, or call the store.";
       btn.disabled = false;
     }

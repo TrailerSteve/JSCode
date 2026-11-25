@@ -699,6 +699,7 @@ function resetAllToDefaults() {
       structurePreview = nextStructurePreview;
     }
   }
+	let interiorView = false;
   const PANEL_ORDER = ["length","width","size_axle","color","feature_oc","feature_ad","feature_e","feature_i", "review", "submit", "sent"];
   let currentIndex = 0;
   function setPanelByIndex(i) {
@@ -1535,7 +1536,6 @@ let groundStart = 0, groundCount = 0;
 let rearFlareStart = 0, rearFlareCount = 0;
 let topFlareStart = 0, topFlareCount = 0;
 
-let interiorView = false;
 let axleMode = 'single';
 let rearFlare = false;
 

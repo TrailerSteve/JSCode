@@ -542,9 +542,12 @@ canvas.addEventListener("pointermove", (e) => {
   canvas.addEventListener("pointercancel", () => dragging = false);
 
 window.addEventListener("keydown", (e) => {
-  if (e.key === "`") {
-    freeCam = !freeCam;
-
+	// Typing in a field (name, phone, email)? Let the key through —
+	// don't treat it as a camera key or shortcut.
+	const t = e.target;
+	if (t && (t.tagName === "INPUT" || t.tagName === "TEXTAREA" || t.tagName === "SELECT" || t.isContentEditable)) return;
+  	if (e.key === "`") {
+    	freeCam = !freeCam;
     if (freeCam) {
       const cp = Math.cos(camPitch), sp = Math.sin(camPitch);
       const cy = Math.cos(camYaw), sy = Math.sin(camYaw);
